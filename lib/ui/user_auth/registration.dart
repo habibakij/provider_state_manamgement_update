@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../model/user_auth_model.dart';
 import '../../utility/common.dart';
 import '../../widget/button_widget.dart';
@@ -226,9 +227,15 @@ class RegistrationScreen extends StatelessWidget {
                             } else if(registrationProvider.rememberPasswordReg == false){
                               Common.customToast("Please accept terms and condition");
                             } else {
+                              final prefs = await SharedPreferences.getInstance();
                               registrationModel= await registrationProvider.registration(nameController.text.toString(), emailController.text.toString(), passwordController.text.toString());
                               if(registrationProvider.registrationStatus == Status.registered){
                                 customToast("Registration success");
+                                prefs.setString("loginToken", registrationModel.authorization.toString());
+                                prefs.setString("loginName", registrationModel.data!.name.toString());
+                                prefs.setString("loginPhone", registrationModel.data!.phone.toString());
+                                prefs.setString("loginEmail", registrationModel.data!.email.toString());
+                                prefs.commit();
                                 Navigator.pushReplacementNamed(context, '/homePage');
                               } else if(registrationProvider.registrationStatus == Status.existingEmail){
                                 customToast("Email already exists");

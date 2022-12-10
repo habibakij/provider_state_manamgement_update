@@ -4,6 +4,7 @@ import 'package:boost_provider_state/model/user_auth_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import '../utility/appUrl.dart';
+import '../utility/common.dart';
 
 enum Status {
   notLoggedIn,
@@ -28,6 +29,19 @@ class LoginProvider extends ChangeNotifier {
   void rememberPasswordStatus(value) {
     rememberPassword = value;
     notifyListeners();
+  }
+
+  void loadingTextField(){
+    _loggedInStatus = Status.authenticating;
+    notifyListeners();
+  }
+
+  void textFieldLoadingValidity(String value){
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _loggedInStatus = Status.notLoggedIn;
+      Common.customToast(value);
+      notifyListeners();
+    });
   }
 
   Future<UserAuthModel> login(String email, String password) async {

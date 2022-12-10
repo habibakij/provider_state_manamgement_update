@@ -401,21 +401,21 @@ class Common{
     );
   }
 
-/*  static serviceCashSave() async{
+  static serviceCashSave(BuildContext context) async{
     final prefs = await SharedPreferences.getInstance();
     prefs.setString("serviceCash", "1");
-    Timer(const Duration(milliseconds: 500), ()=> Get.to(SelectHomeScreen()));
+    Timer(const Duration(milliseconds: 500), ()=> Navigator.pushNamed(context, "/selectProperty"));
   }
 
-  static homeCashSave() async{
+  static homeCashSave(BuildContext context) async{
     final prefs = await SharedPreferences.getInstance();
     prefs.setString("serviceCash", "0");
-    Timer(const Duration(milliseconds: 500), ()=> Get.to(SelectHomeScreen()));
+    Timer(const Duration(milliseconds: 500), ()=> Navigator.pushNamed(context, "/selectProperty"));
   }
 
   static cashClear() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.clear();
-  }*/
+  }
 
 }

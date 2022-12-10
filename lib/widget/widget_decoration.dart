@@ -14,6 +14,7 @@ final loading = Row(
   mainAxisAlignment: MainAxisAlignment.center,
   children: const <Widget>[
     CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+    SizedBox(width: 10),
     Text(" Loading... please wait", style: TextStyle(color: Colors.white))
   ],
 );

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../provider/login_provider.dart';
 import '../../utility/common.dart';
 import '../../widget/button_widget.dart';
@@ -15,7 +16,6 @@ class Login extends StatelessWidget {
   TextEditingController emailController= TextEditingController();
   TextEditingController passwordController= TextEditingController();
   UserAuthModel loginModel= UserAuthModel();
-
   @override
   Widget build(BuildContext context) {
     LoginProvider loginProvider = Provider.of<LoginProvider>(context);
@@ -183,7 +183,6 @@ class Login extends StatelessWidget {
                       ],
                     ),
 
-
                   ],
                 ),
               ),
@@ -200,19 +199,40 @@ class Login extends StatelessWidget {
                       color: Colors.white,
                       textColor: Colors.black,
                       onPress: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        loginModel= await loginProvider.login("user1@gmail.com","12345678");
+                        if(loginProvider.loggedInStatus == Status.loggedIn){
+                          customToast("Login success");
+                          prefs.setString("loginToken", loginModel.authorization.toString());
+                          prefs.setString("loginName", loginModel.data!.name.toString());
+                          prefs.setString("loginPhone", loginModel.data!.phone.toString());
+                          prefs.setString("loginEmail", loginModel.data!.email.toString());
+                          prefs.commit();
+                          Navigator.pushReplacementNamed(context, '/selectProperty');
+                        } else if(loginProvider.loggedInStatus == Status.notLoggedIn){
+                          customToast("Invalid Email or password");
+                        }
+                        /*loginProvider.loadingTextField();
                         if(emailController.text.toString().isEmpty){
-                          Common.customToast("Enter Email");
+                          loginProvider.textFieldLoadingValidity("Enter Email");
                         } else if(passwordController.text.toString().isEmpty){
-                          Common.customToast("Enter Password");
-                        }  else {
+                          loginProvider.textFieldLoadingValidity("Enter Password");
+                        } else {
+                          final prefs = await SharedPreferences.getInstance();
+                          loginModel= await loginProvider.login("user1@gmail.com","12345678");
                           loginModel= await loginProvider.login(emailController.text.toString(), passwordController.text.toString());
                           if(loginProvider.loggedInStatus == Status.loggedIn){
                             customToast("Login success");
-                            Navigator.pushReplacementNamed(context, '/homePage');
+                            prefs.setString("loginToken", loginModel.authorization.toString());
+                            prefs.setString("loginName", loginModel.data!.name.toString());
+                            prefs.setString("loginPhone", loginModel.data!.phone.toString());
+                            prefs.setString("loginEmail", loginModel.data!.email.toString());
+                            prefs.commit();
+                            Navigator.pushReplacementNamed(context, '/selectProperty');
                           } else if(loginProvider.loggedInStatus == Status.notLoggedIn){
                             customToast("Invalid Email or password");
                           }
-                        }
+                        }*/
                       },
                     ),
 
