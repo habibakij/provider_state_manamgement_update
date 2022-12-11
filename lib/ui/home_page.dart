@@ -11,16 +11,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../provider/select_property_provider.dart';
 import '../utility/common.dart';
 
-class HomePage extends StatelessWidget {
+
+class HomePage extends StatefulWidget {
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+class _HomePageState extends State<HomePage> {
   TextEditingController searchController = TextEditingController();
 
-  var appController;
-  var selectHomeController;
   late DateTime currentBackPressTime;
   String selectedHome = "";
-
   ShapeBorder? bottomBarShape = const RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(25)),
   );
@@ -40,514 +43,21 @@ class HomePage extends StatelessWidget {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final homeScreenProvider= Provider.of<HomeScreenProvider>(context, listen: false);
+      homeScreenProvider.getCategory();
+      homeScreenProvider.getFeaturedService();
+      homeScreenProvider.getTestimonial();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     HomeScreenProvider homeScreenProvider = Provider.of<HomeScreenProvider>(context);
-    appController.onInit();
+    SelectPropertyProvider selectPropertyProvider = Provider.of<SelectPropertyProvider>(context);
     Common.dynamicScreenSize(context);
-    final List<Widget> _children = [
-      Center(
-        child: Container(
-          height: Common.mediaQueryHeight,
-          color: Colors.grey.withOpacity(.2),
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      bottomRight: Radius.circular(30),
-                      bottomLeft: Radius.circular(30),
-                    ),
-                    gradient: LinearGradient(
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                      stops: const [0.1, 0.9],
-                      colors: [HexColor("#00639C"), HexColor("#00AFDE")],
-                    ),
-                  ),
-                  child: Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          height: 250,
-                          width: Common.mainContainerWidth * .52,
-                          margin: const EdgeInsets.only(left: 15, top: 50, bottom: 15),
-                          alignment: Alignment.centerLeft,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              InkWell(
-                                child: Container(
-                                  decoration: const BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                                    color: Colors.white,
-                                  ),
-                                  padding: const EdgeInsets.only(top: 10, bottom: 10, left: 8, right: 8),
-                                  margin: const EdgeInsets.only(top: 10),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                      Container(height: 3, width: 20, color: Colors.grey),
-                                      Container(height: 3, width: 25, margin: const EdgeInsets.only(top: 5),color: Colors.grey),
-                                      Container(height: 3, width: 20, margin: const EdgeInsets.only(top: 5), color: Colors.grey),
-                                    ],
-                                  ),
-                                ),
-                                onTap: () => scaffoldKey.currentState?.openDrawer(),
-                              ),
-
-                              Container(
-                                margin: const EdgeInsets.only(top: 30),
-                                child: Text(
-                                  "What type of services",
-                                  style: GoogleFonts.raleway(textStyle: Common.testStyleWhiteBold16),
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.only(top: 10),
-                                child: Text(
-                                  "do you need?",
-                                  style: GoogleFonts.raleway(textStyle: Common.testStyleWhiteBold16),
-                                ),
-                              ),
-                              Container(
-                                height: 40,
-                                width: 120,
-                                alignment: Alignment.center,
-                                margin: const EdgeInsets.only(top: 20),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  color: Colors.white,
-                                ),
-                                child: TextButton(
-                                  child: Text("Get Start",style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold16)),
-                                  onPressed: () {},
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          height: 250,
-                          width: Common.mainContainerWidth * .48,
-                          child: Stack(
-                            children: [
-                              Image.asset(
-                                "images/homelogo.png",
-                                width: Common.mainContainerWidth * .48,
-                                height: 250,
-                                fit: BoxFit.fitHeight,
-                              ),
-                              InkWell(
-                                child: Container(
-                                  margin: EdgeInsets.zero,
-                                  alignment: Alignment.topRight,
-                                  child: Container(
-                                    height: 10,
-                                    width: 65,
-                                    alignment: Alignment.center,
-                                    margin: const EdgeInsets.all(5),
-                                    child: const Text(
-                                      "Change Home",
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(fontSize: 10, color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                                onTap: () {
-                                  Timer(const Duration(milliseconds: 200), () => Navigator.pushNamed(context, '/selectProperty'));
-                                },
-                              ),
-
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                /// search
-                Container(
-                  height: 55,
-                  width: Common.mediaQueryWidth,
-                  margin: const EdgeInsets.only(top: 10, left: 15, right: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.white,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: Common.mediaQueryWidth - 95,
-                        margin: const EdgeInsets.only(right: 5, left: 5),
-                        alignment: Alignment.centerLeft,
-                        child: TextFormField(
-                          controller: searchController,
-                          style: const TextStyle(fontSize: 14, color: Colors.black),
-                          onTap: () {
-                            FocusScopeNode currentFocus = FocusScope.of(context);
-                            if (!currentFocus.hasPrimaryFocus) {
-                              currentFocus.unfocus();
-                            }
-                            Timer(const Duration(milliseconds: 500), () => Navigator.pushNamed(context, '/propertySearch'));
-                          },
-                          decoration: const InputDecoration(
-                            focusColor: Colors.blue,
-                            border: InputBorder.none,
-                            hintText: "Search Services",
-                            hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
-                            contentPadding: EdgeInsets.only(left: 10),
-                          ),
-                        ),
-                      ),
-                      Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        color: Colors.blue,
-                        child: InkWell(
-                          child: const SizedBox(
-                            height: 55,
-                            width: 50,
-                            child: Icon(Icons.search, color: Colors.white),
-                          ),
-                          onTap: () {},
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                /// category and see all
-                Container(
-                  height: 30,
-                  width: Common.mediaQueryWidth,
-                  margin: const EdgeInsets.only(top: 5, left: 5),
-                  child: Row(
-                    children: [
-                      Container(
-                        height: 30,
-                        width: (Common.mediaQueryWidth / 100) * 50 - 12,
-                        padding: const EdgeInsets.only(left: 10),
-                        alignment: Alignment.centerLeft,
-                        child: Text("Categories", style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold16)),
-                      ),
-                      InkWell(
-                        child: Container(
-                          height: 30,
-                          width: (Common.mediaQueryWidth / 100) * 50,
-                          padding: const EdgeInsets.only(right: 10),
-                          alignment: Alignment.centerRight,
-                          child: const Text(
-                            "View All",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.pushNamed(context, '/allCategory');
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-                /// category
-                MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  removeRight: true,
-                  removeBottom: true,
-                  removeLeft: true,
-                  child: AlignedGridView.count(
-                    controller: appController.controller,
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 0,
-                    crossAxisSpacing: 0,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: appController.categoryData.length,
-                    itemBuilder: (context, index) {
-                      return InkWell(
-                        child: DelayedDisplay(
-                          delay: const Duration(milliseconds: 100),
-                          slidingBeginOffset: const Offset(0.0, 0.10),
-                          child: Container(
-                            height: 110,
-                            width: (Common.mediaQueryWidth / 100) * 25 - 5,
-                            margin: const EdgeInsets.only(left: 10),
-                            child: Column(
-                              children: [
-                                Container(
-                                  height: 60,
-                                  width: 60,
-                                  decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20)), color: Colors.white),
-                                  child: appController.categoryIcon[index] == "null" || appController.categoryIcon[index] == "icon" ? Image.asset(
-                                    "images/boostlogo.png",
-                                    height: 60,
-                                    width: 60,
-                                  ) : Image.network(
-                                    appController.categoryIcon[index].toString(),
-                                    height: 60,
-                                    width: 60,
-                                  ),
-                                ),
-                                Container(
-                                  height: 40,
-                                  margin: const EdgeInsets.only(top: 5),
-                                  child: Text(
-                                    "${appController.categoryTitle[index].toString()} ",
-                                    textAlign:TextAlign.center,
-                                    style: GoogleFonts.raleway(textStyle: Common.testStyleBlack13),
-                                    maxLines: 2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        onTap: () async {
-                          final prefs = await SharedPreferences.getInstance();
-                          prefs.setString("subTitle", appController.categoryTitle[index].toString());
-                          log("category_id: ${appController.categoryID[index]} title: ${appController.categoryTitle[index].toString()}");
-                          appController.getService(appController.categoryID[index].toString());
-                        },
-                      );
-                    }
-                  ),
-                ),
-
-                Container(
-                  height: 30,
-                  width: Common.mediaQueryWidth,
-                  padding: const EdgeInsets.only(left: 15),
-                  alignment: Alignment.centerLeft,
-                  child: Text("Popular Service", style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold16)),
-                ),
-
-                /// popular
-                MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  removeRight: true,
-                  removeBottom: true,
-                  removeLeft: true,
-                  child: ListView.builder(
-                    itemCount: appController.data.length,
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        child: DelayedDisplay(
-                          delay: const Duration(milliseconds: 100),
-                          slidingBeginOffset: const Offset(0.0, 0.10),
-                          child: Container(
-                            height: 150,
-                            width: Common.mainContainerWidth,
-                            margin: const EdgeInsets.only(left: 10, right: 10),
-                            child: Card(
-                              shape: RoundedRectangleBorder(
-                                side: const BorderSide(color: Colors.white, width: 1),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Row(
-                                children: [
-
-                                  SizedBox(
-                                    height: 150,
-                                    width: Common.mainContainerWidth * .48,
-                                    child: ClipRRect(
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(10),
-                                        bottomLeft: Radius.circular(10),
-                                      ),
-                                      child: appController.serviceImage[index] == "null" ? Image.asset(
-                                        "images/boostlogo.png",
-                                        height: 130,
-                                        width: (Common.mainContainerWidth / 100) * 45 - 2,
-                                        fit: BoxFit.fill,
-                                      ) : Image.network(
-                                        appController.serviceImage[index].toString(),
-                                        height: 130,
-                                        width: (Common.mainContainerWidth / 100) * 45 - 2,
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ),
-                                  ),
-
-                                  SizedBox(
-                                    height: 150,
-                                    width: Common.mainContainerWidth * .50,
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          height: 40,
-                                          alignment: Alignment.centerLeft,
-                                          padding: const EdgeInsets.only(left: 10),
-                                          child: Text(
-                                            appController.serviceName[index].toString(),
-                                            textAlign: TextAlign.start,
-                                            style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold14,),
-                                          ),
-                                        ),
-                                        Container(
-                                          height: 70,
-                                          alignment: Alignment.topLeft,
-                                          padding: const EdgeInsets.only(left: 10),
-                                          child: Text(
-                                            appController.serviceDescription[index].toString(),
-                                            textAlign: TextAlign.justify,
-                                            style: GoogleFonts.raleway(textStyle: Common.testStyleBlack13,),
-                                            maxLines: 4,
-                                          ),
-                                        ),
-                                        Container(
-                                          height: 20,
-                                          alignment: Alignment.centerLeft,
-                                          padding: const EdgeInsets.only(left: 10),
-                                          child: Text(
-                                            "By ${appController.serviceName[index].toString()}",
-                                            textAlign: TextAlign.start,
-                                            style: const TextStyle(fontSize: 12, color: Colors.grey),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        onTap: () {
-                          log("check_popular_id: ${appController.serviceListID[index].toString()}");
-                          appController.getServiceDetails(appController.serviceListID[index].toString());
-                        },
-                      );
-                    },
-                  ),
-                ),
-
-                /// testimonial
-                Container(
-                  height: 30,
-                  width: Common.mediaQueryWidth,
-                  margin: const EdgeInsets.only(left: 15, top: 10),
-                  child: Text("Testimonial", style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold16,)),
-                ),
-
-                SizedBox(
-                  height: 270,
-                  child: MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    removeRight: true,
-                    removeBottom: true,
-                    removeLeft: true,
-                    child: ListView.builder(
-                      itemCount: appController.testimonialData.length,
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext context, int index) {
-                        return DelayedDisplay(
-                          delay: const Duration(milliseconds: 100),
-                          slidingBeginOffset: const Offset(0.0, 0.10),
-                          child: Container(
-                            width: Common.halfWidth + 70,
-                            margin: const EdgeInsets.only(left: 5),
-                            child: Card(
-                              elevation: 0,
-                              color: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              child: Container(
-                                color: Colors.white,
-                                margin: const EdgeInsets.all(5),
-                                child: Column(
-                                  children: <Widget>[
-
-                                    Container(
-                                      width: 100,
-                                      height: 100,
-                                      margin: const EdgeInsets.only(top: 5),
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.blue, width: 2),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: const BorderRadius.all(Radius.circular(30)),
-                                        child: appController.testImage[index] == "null" ? Image.asset(
-                                          "images/boostlogo.png",
-                                          width: 100,
-                                          height: 100,
-                                          fit: BoxFit.fill,
-                                        ) : Image.network(
-                                          appController.testImage[index].toString(),
-                                          width: 100,
-                                          height: 100,
-                                          fit: BoxFit.fill,
-                                        ),
-                                      ),
-                                    ),
-
-                                    Container(
-                                      height: 25,
-                                      width: Common.halfWidth + 70,
-                                      margin: const EdgeInsets.only(top: 5),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        "${appController.testTitle[index].toString().isEmpty ? "Empty" : appController.testTitle[index].toString()} ",
-                                        style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold14,),
-                                      ),
-                                    ),
-
-                                    Container(
-                                      height: 20,
-                                      width: Common.halfWidth + 70,
-                                      alignment: Alignment.topCenter,
-                                      child: Text(
-                                        "${appController.testDesignation[index].toString().isEmpty ? "Empty" : appController.testDesignation[index].toString()} ",
-                                        style: GoogleFonts.raleway(textStyle: Common.testStyleBlack13),
-                                      ),
-                                    ),
-
-                                    Container(
-                                      width: Common.halfWidth + 70,
-                                      alignment: Alignment.center,
-                                      margin: const EdgeInsets.only(left: 10, right: 10),
-                                      child: Text(
-                                        "“${appController.testDescription[index].toString().isEmpty ? "Empty" : appController.testDescription[index].toString()}“",
-                                        textAlign: TextAlign.justify,
-                                        style: GoogleFonts.raleway(textStyle: Common.testStyleBlack13),
-                                        maxLines: 3,
-                                      ),
-                                    ),
-
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-
-              ],
-            ),
-          ),
-        ),
-      )
-    ];
     getSelectedCash();
     return WillPopScope(
       onWillPop: () async => false,
@@ -632,10 +142,7 @@ class HomePage extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(15),
                                         color: Colors.white,
                                       ),
-                                      child: TextButton(
-                                        child: Text("Get Start",style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold16)),
-                                        onPressed: () {},
-                                      ),
+                                      child: Text("Get Start",style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold16)),
                                     ),
                                   ],
                                 ),
@@ -783,7 +290,7 @@ class HomePage extends StatelessWidget {
                                 crossAxisSpacing: 0,
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
-                                itemCount: provider.categoryModel!.data!.length,
+                                itemCount: provider.categoryModel == null ? 0 : provider.categoryModel!.data!.length,
                                 itemBuilder: (context, index) {
                                   return InkWell(
                                     child: DelayedDisplay(
@@ -799,7 +306,7 @@ class HomePage extends StatelessWidget {
                                               height: 60,
                                               width: 60,
                                               decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20)), color: Colors.white),
-                                              child: provider.categoryModel!.data![index].icon == "null" ||
+                                              child: provider.categoryModel!.data![index].icon.toString() == "null" ||
                                                   provider.categoryModel!.data![index].icon == "icon" ? Image.asset(
                                                 "images/boostlogo.png",
                                                 height: 60,
@@ -856,7 +363,7 @@ class HomePage extends StatelessWidget {
                         child: Consumer<HomeScreenProvider>(
                           builder: ((context, provider, child){
                             return ListView.builder(
-                              itemCount: provider.featuredServiceModel!.data!.length,
+                              itemCount: provider.featuredServiceModel == null ? 0 : provider.featuredServiceModel!.data!.length,
                               scrollDirection: Axis.vertical,
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
@@ -963,10 +470,6 @@ class HomePage extends StatelessWidget {
                         child: Text("Testimonial", style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold16,)),
                       ),
 
-                      /*
-
-
-
                       SizedBox(
                         height: 270,
                         child: MediaQuery.removePadding(
@@ -975,101 +478,99 @@ class HomePage extends StatelessWidget {
                           removeRight: true,
                           removeBottom: true,
                           removeLeft: true,
-                          child: ListView.builder(
-                            itemCount: appController.testimonialData.length,
-                            scrollDirection: Axis.horizontal,
-                            shrinkWrap: true,
-                            itemBuilder: (BuildContext context, int index) {
-                              return DelayedDisplay(
-                                delay: const Duration(milliseconds: 100),
-                                slidingBeginOffset: const Offset(0.0, 0.10),
-                                child: Container(
-                                  width: Common.halfWidth + 70,
-                                  margin: const EdgeInsets.only(left: 5),
-                                  child: Card(
-                                    elevation: 0,
-                                    color: Colors.white,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          child: Consumer<HomeScreenProvider>(
+                            builder: ((context, provider, child){
+                              return ListView.builder(
+                                itemCount: provider.testimonialModel == null ? 0 : provider.testimonialModel!.data!.length,
+                                scrollDirection: Axis.horizontal,
+                                shrinkWrap: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return DelayedDisplay(
+                                    delay: const Duration(milliseconds: 100),
+                                    slidingBeginOffset: const Offset(0.0, 0.10),
                                     child: Container(
-                                      color: Colors.white,
-                                      margin: const EdgeInsets.all(5),
-                                      child: Column(
-                                        children: <Widget>[
+                                      width: Common.halfWidth + 70,
+                                      margin: const EdgeInsets.only(left: 5),
+                                      child: Card(
+                                        elevation: 0,
+                                        color: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                        child: Container(
+                                          color: Colors.white,
+                                          margin: const EdgeInsets.all(5),
+                                          child: Column(
+                                            children: <Widget>[
 
-                                          Container(
-                                            width: 100,
-                                            height: 100,
-                                            margin: const EdgeInsets.only(top: 5),
-                                            padding: const EdgeInsets.all(5),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(color: Colors.blue, width: 2),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius: const BorderRadius.all(Radius.circular(30)),
-                                              child: appController.testImage[index] == "null" ? Image.asset(
-                                                "images/boostlogo.png",
+                                              Container(
                                                 width: 100,
                                                 height: 100,
-                                                fit: BoxFit.fill,
-                                              ) : Image.network(
-                                                appController.testImage[index].toString(),
-                                                width: 100,
-                                                height: 100,
-                                                fit: BoxFit.fill,
+                                                margin: const EdgeInsets.only(top: 5),
+                                                padding: const EdgeInsets.all(5),
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(color: Colors.blue, width: 2),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius: const BorderRadius.all(Radius.circular(30)),
+                                                  child: provider.testimonialModel!.data![index].image == null ? Image.asset(
+                                                    "images/boostlogo.png",
+                                                    width: 100,
+                                                    height: 100,
+                                                    fit: BoxFit.fill,
+                                                  ) : Image.network(
+                                                    provider.testimonialModel!.data![index].image!.original.toString(),
+                                                    width: 100,
+                                                    height: 100,
+                                                    fit: BoxFit.fill,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
 
-                                          Container(
-                                            height: 25,
-                                            width: Common.halfWidth + 70,
-                                            margin: const EdgeInsets.only(top: 5),
-                                            alignment: Alignment.center,
-                                            child: Text(
-                                              "${appController.testTitle[index].toString().isEmpty ? "Empty" : appController.testTitle[index].toString()} ",
-                                              style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold14,),
-                                            ),
-                                          ),
+                                              Container(
+                                                height: 25,
+                                                width: Common.halfWidth + 70,
+                                                margin: const EdgeInsets.only(top: 5),
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  provider.testimonialModel!.data![index].title.toString(),
+                                                  style: GoogleFonts.raleway(textStyle: Common.testStyleBlackBold14,),
+                                                ),
+                                              ),
 
-                                          Container(
-                                            height: 20,
-                                            width: Common.halfWidth + 70,
-                                            alignment: Alignment.topCenter,
-                                            child: Text(
-                                              "${appController.testDesignation[index].toString().isEmpty ? "Empty" : appController.testDesignation[index].toString()} ",
-                                              style: GoogleFonts.raleway(textStyle: Common.testStyleBlack13),
-                                            ),
-                                          ),
+                                              Container(
+                                                height: 20,
+                                                width: Common.halfWidth + 70,
+                                                alignment: Alignment.topCenter,
+                                                child: Text(
+                                                  provider.testimonialModel!.data![index].designation.toString(),
+                                                  style: GoogleFonts.raleway(textStyle: Common.testStyleBlack13),
+                                                ),
+                                              ),
 
-                                          Container(
-                                            width: Common.halfWidth + 70,
-                                            alignment: Alignment.center,
-                                            margin: const EdgeInsets.only(left: 10, right: 10),
-                                            child: Text(
-                                              "“${appController.testDescription[index].toString().isEmpty ? "Empty" : appController.testDescription[index].toString()}“",
-                                              textAlign: TextAlign.justify,
-                                              style: GoogleFonts.raleway(textStyle: Common.testStyleBlack13),
-                                              maxLines: 3,
-                                            ),
-                                          ),
+                                              Container(
+                                                width: Common.halfWidth + 70,
+                                                alignment: Alignment.center,
+                                                margin: const EdgeInsets.only(left: 10, right: 10),
+                                                child: Text(
+                                                  provider.testimonialModel!.data![index].description.toString(),
+                                                  textAlign: TextAlign.justify,
+                                                  style: GoogleFonts.raleway(textStyle: Common.testStyleBlack13),
+                                                  maxLines: 3,
+                                                ),
+                                              ),
 
-                                        ],
+                                            ],
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
-
-                                ),
+                                  );
+                                },
                               );
-                            },
+                            }),
                           ),
                         ),
                       ),
-
-
-
-
-                      */
 
                     ],
                   ),
@@ -1087,10 +588,9 @@ class HomePage extends StatelessWidget {
           unselectedItemColor: unselectedColor,
           showUnselectedLabels: showUnselectedLabels,
           showSelectedLabels: showSelectedLabels,
-          currentIndex: appController.selectedNevItemPosition.value,
+          currentIndex: homeScreenProvider.selectedNevItemPosition,
           onTap: (index) {
-            appController.nevPosition(index);
-            log("check_value: ${appController.selectedNevItemPosition.value}");
+            homeScreenProvider.nevPosition(index);
             if (index == 0) {
             } else if (index == 1) {
               if (selectedHome != "1") {
@@ -1157,7 +657,7 @@ class HomePage extends StatelessWidget {
                                   () => {Navigator.pop(context), Navigator.pushNamed(context, "/notification")}, Icons.arrow_forward_ios),
                           Container(height: 1, color: Colors.grey, margin: const EdgeInsets.only(left: 5, right: 20)),
                           Common.customDrawerItem("Service", Icons.calendar_today_rounded, () => {Navigator.pop(context),
-                            if (selectHomeController.listItem.value == 10000000){
+                            if (selectPropertyProvider.listItem == 10000000){
                               Common.serviceCashSave(context)
                             } else {
                               Timer(const Duration(milliseconds: 500), () => Navigator.pushNamed(context, "/serviceOwner"))
@@ -1225,7 +725,7 @@ class HomePage extends StatelessWidget {
                         ),
                         onTap: () {
                           Navigator.pop(context);
-                          appController.userLogout();
+                          //appController.userLogout();
                         },
                       ),
                       Container(width: 1, height: 50, color: Colors.grey),
@@ -1282,7 +782,7 @@ class HomePage extends StatelessWidget {
                         ),
                         onTap: () {
                           Navigator.pop(context);
-                          appController.userDelete();
+                          //appController.userDelete();
                         },
                       ),
                       Container(width: 1, height: 50, color: Colors.grey),

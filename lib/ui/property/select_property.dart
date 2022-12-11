@@ -136,7 +136,7 @@ class _SelectHomeScreen extends State<SelectPropertyScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.vertical,
-                itemCount: provider.selectPropertyModel!.data!.length,
+                itemCount: provider.selectPropertyModel == null ? 0 : provider.selectPropertyModel!.data!.length,
                 itemBuilder: (context, index) => Card(
                   margin: const EdgeInsets.only(left: 15,right: 15, top: 10),
                   elevation: 0,

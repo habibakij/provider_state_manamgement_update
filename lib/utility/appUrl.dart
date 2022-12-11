@@ -6,4 +6,5 @@ class AppUrl {
   static const String property = '$baseUrl/api/propertys';
   static const String category = '$baseUrl/api/categories';
   static const String featureService = '$baseUrl/api/services?featured=true';
+  static const String testimonials = '$baseUrl/api/testimonials';
 }

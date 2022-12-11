@@ -1,4 +1,5 @@
 
+import 'package:boost_provider_state/provider/home_screen_provider.dart';
 import 'package:boost_provider_state/provider/login_provider.dart';
 import 'package:boost_provider_state/provider/registration_provider.dart';
 import 'package:boost_provider_state/provider/select_property_provider.dart';
@@ -31,9 +32,11 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_)=> LoginProvider()),
         ChangeNotifierProvider(create: (_)=> RegistrationProvider()),
-        ChangeNotifierProvider(create: (_)=> SelectPropertyProvider())
+        ChangeNotifierProvider(create: (_)=> SelectPropertyProvider()),
+        ChangeNotifierProvider(create: (_)=> HomeScreenProvider())
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
