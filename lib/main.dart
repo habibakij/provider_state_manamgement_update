@@ -3,6 +3,7 @@ import 'package:boost_provider_state/provider/home_screen_provider.dart';
 import 'package:boost_provider_state/provider/login_provider.dart';
 import 'package:boost_provider_state/provider/registration_provider.dart';
 import 'package:boost_provider_state/provider/select_property_provider.dart';
+import 'package:boost_provider_state/provider/service_owner_provider.dart';
 import 'package:boost_provider_state/ui/category/all_category.dart';
 import 'package:boost_provider_state/ui/home_page.dart';
 import 'package:boost_provider_state/ui/notification/notification_screen.dart';
@@ -33,7 +34,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_)=> LoginProvider()),
         ChangeNotifierProvider(create: (_)=> RegistrationProvider()),
         ChangeNotifierProvider(create: (_)=> SelectPropertyProvider()),
-        ChangeNotifierProvider(create: (_)=> HomeScreenProvider())
+        ChangeNotifierProvider(create: (_)=> HomeScreenProvider()),
+        ChangeNotifierProvider(create: (_)=> ServiceOwnerProvider())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
